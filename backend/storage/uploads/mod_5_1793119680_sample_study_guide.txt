@@ -1,0 +1,9 @@
+DBMS STUDY GUIDE — NORMALIZATION & RELATIONAL ALGEBRA
+
+Topic 1: Functional Dependencies
+A Functional Dependency (FD) X -> Y specifies that the value of X uniquely determines Y.
+Armstrong's Axioms: Reflexivity, Augmentation, and Transitivity.
+
+Topic 2: Boyce-Codd Normal Form (BCNF)
+A relation R is in BCNF if for every non-trivial functional dependency X -> Y, X is a super key.
+BCNF is stricter than 3NF and eliminates all redundancy based on functional dependencies.

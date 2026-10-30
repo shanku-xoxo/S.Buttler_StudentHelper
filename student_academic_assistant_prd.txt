@@ -1,0 +1,629 @@
+STUDENT ACADEMIC ASSISTANT
+PRODUCT REQUIREMENTS DOCUMENT (PRD)
+
+Project Type: Web Application
+Primary Users: Students
+
+1. PRODUCT OVERVIEW
+
+The Student Academic Assistant is a web-based platform designed to combine four major academic workflows into one integrated system:
+
+1. AI Student Assistant
+2. Calendar & Academic Deadline Management
+3. Todo List & Dynamic Academic Planner
+4. Notes & Document Manager
+
+The system provides a unified academic environment in which these functions share common student, subject, module, task, event, and document data.
+
+The AI assistant acts as the central interaction layer but should not directly manipulate application data without explicit user confirmation.
+
+2. PROBLEM STATEMENT
+
+Students often manage academic activities using several disconnected applications and manually maintained folders. They may use an AI chatbot for doubts, a calendar for exams and assignment deadlines, a Todo application for tasks, and local folders for academic notes.
+
+Because these systems are disconnected, changes made in one place often have to be manually reflected elsewhere.
+
+The proposed system centralizes these workflows while keeping the student in control of actions that modify their academic data.
+
+3. PRODUCT GOALS
+
+- Provide an AI-powered academic assistant.
+- Allow students to use their own academic material as context for AI responses.
+- Organize academic documents according to semester, subject, and module.
+- Manage exams, assignments, classes, deadlines, and other events.
+- Provide a unified Todo and academic planning system.
+- Track student progress.
+- Dynamically update plans when progress changes.
+- Estimate time required to complete academic tasks.
+- Allow AI-assisted updates while requiring user confirmation for important modifications.
+- Keep all four major modules connected through a common backend and database.
+
+4. NON-GOALS
+
+The first version will not attempt to:
+- Replace a complete Learning Management System.
+- Automatically make academic decisions without user confirmation.
+- Automatically save every AI response.
+- Automatically reorganize files without confirmation.
+- Automatically mark topics as completed merely because they appear in uploaded notes.
+- Build a social network for students.
+- Provide unrestricted general-purpose AI unrelated to academics.
+
+5. TARGET USER
+
+The primary target user is a student who has:
+- Multiple academic subjects.
+- Module-wise study material.
+- Exams and assignment deadlines.
+- Daily and long-term academic tasks.
+- A need to track academic progress.
+- Multiple documents stored locally.
+- A need for AI-based explanations and study assistance.
+
+6. ACADEMIC DATA HIERARCHY
+
+The system should support:
+
+Academic Year
+    -> Semester
+        -> Subject
+            -> Module / Category
+                -> Documents
+
+A module/category can contain one or multiple documents.
+
+The system must not assume that every subject contains the same modules or that categories must be named mod1, mod2, etc.
+
+7. FEATURE 1 — AI STUDENT ASSISTANT
+
+Purpose:
+The AI assistant acts as the student's academic assistant rather than simply being a generic chatbot.
+
+It should help the student:
+- Understand academic concepts.
+- Ask questions.
+- Summarize content.
+- Generate explanations.
+- Generate practice questions.
+- Interact with academic material.
+- Save selected AI-generated notes.
+- Add academic events to the calendar.
+- Update academic progress.
+- Assist with planning.
+
+7.1 Academic Questions
+
+Students can ask questions such as:
+- "Explain deadlock in simple terms."
+- "What is normalization?"
+- "Give me five questions on relational algebra."
+- "Summarize this topic."
+
+AI conversations should not automatically become permanent notes.
+
+7.2 Student Notes as AI Context
+
+Students can provide their own academic documents.
+
+The AI should retrieve relevant information from these documents when answering questions.
+
+Flow:
+
+Student Question
+    -> AI Assistant
+        -> Search Student's Academic Material
+            -> Relevant Content
+                -> AI Response
+
+7.3 AI-GENERATED NOTES
+
+The student may explicitly request:
+"Make notes for Relational DBMS."
+
+The system generates notes and provides a Save as Note action.
+
+The notes are associated with:
+Semester -> Subject -> Module.
+
+7.4 DEFAULT NOTES FILE
+
+Each module/category should normally have a default:
+
+notes.txt
+
+AI-generated topic notes should normally be appended to this file.
+
+Example:
+
+DBMS
+  Module 2
+    notes.txt
+    Lecture1.pdf
+    Lecture2.pdf
+
+The notes file should use clear separators, topic headings, and dates.
+
+7.5 EXPLICIT NEW FILE CREATION
+
+If the student explicitly requests a new file, the system creates a separate file.
+
+Example:
+"Create a separate notes file for Normalization."
+
+7.6 WHOLE-MODULE SUMMARY
+
+The student can request:
+"Make summary notes for the whole DBMS Module 2."
+
+The system:
+1. Identifies the subject and module.
+2. Retrieves documents associated with that module.
+3. Extracts/retrieves their relevant content.
+4. Generates a consolidated summary.
+5. Appends the summary to the module's notes.txt.
+
+7.7 AI -> CALENDAR
+
+The AI can identify calendar-related information.
+
+Example:
+"My DBMS exam is next Thursday at 10 AM."
+
+The system identifies the potential event and provides an Add to Calendar action.
+
+The student confirms or edits before it is stored.
+
+The AI must not silently create calendar events.
+
+7.8 AI -> PROGRESS
+
+The AI can understand progress statements.
+
+Example:
+"I've completed DBMS till Relational DBMS."
+
+The AI identifies relevant academic tasks/topics and presents the proposed update.
+
+After confirmation:
+Relational DBMS -> Marked Complete -> Todo Updated -> Planner Recalculated.
+
+The AI should not automatically mark tasks complete without confirmation.
+
+8. FEATURE 2 — CALENDAR & DEADLINE MANAGEMENT
+
+Purpose:
+The Calendar represents when something happens or is due.
+
+It should support:
+- Exams.
+- Assignments and assignment deadlines.
+- Classes.
+- Labs.
+- Study sessions.
+- Personal events.
+- Other academic events.
+
+8.1 CALENDAR EVENT MANAGEMENT
+
+The system should support:
+- Create event.
+- Retrieve event.
+- Update event.
+- Delete event.
+- Retrieve events by date.
+- Retrieve events by month.
+- Associate events with subjects.
+- Store start/end times.
+- Store descriptions.
+- Store event types.
+- Store reminders.
+
+8.2 ASSIGNMENT DEADLINES
+
+Assignments are treated as calendar items/deadlines.
+
+They can be added manually or through the AI.
+
+Example:
+"My DBMS assignment is due next Monday."
+
+The AI provides Add to Calendar, and the student confirms before creation.
+
+8.3 CALENDAR AND PLANNER RELATIONSHIP
+
+Calendar answers:
+"When is something due?"
+
+Planner answers:
+"What do I need to do to complete it?"
+
+Example:
+
+DBMS Assignment
+    -> Calendar: Due 25 August
+    -> Planner:
+        - Research
+        - Write
+        - Submit
+
+A calendar event may be linked to one or more planner tasks.
+
+9. FEATURE 3 — TODO LIST & DYNAMIC PLANNER
+
+Purpose:
+The Todo and Planner system manages:
+- What the student needs to do.
+- What has already been completed.
+- How much work remains.
+- How long remaining work is expected to take.
+- How work should be distributed across available time.
+
+Todo and Planner use one underlying task/progress system.
+
+9.1 PLANNING LEVELS
+
+The planner supports:
+- Daily planning.
+- Monthly planning.
+- Semester planning.
+- Academic-year planning.
+
+These are different views of the same underlying data.
+
+9.2 TASKS
+
+A task can contain:
+- Task ID.
+- User.
+- Subject.
+- Parent goal/task.
+- Title.
+- Description.
+- Status.
+- Priority.
+- Estimated hours.
+- Actual hours.
+- Due date.
+- Scheduled date.
+- Completion date.
+
+Example:
+
+DBMS Exam Preparation
+    - Module 1
+    - Module 2
+        - Relational DBMS
+        - Relational Algebra
+        - Normalization
+    - Revision
+
+9.3 PROGRESS TRACKING
+
+The student can manually update task progress.
+
+The AI can also propose progress updates.
+
+Example:
+"I've completed DBMS till Relational DBMS."
+
+After confirmation, the relevant task is marked completed and Todo/Planner state updates.
+
+9.4 DYNAMIC PLANNING
+
+The planner reacts to changes in student progress.
+
+Example:
+
+Initial:
+Module 2 = 3 hours
+Module 3 = 4 hours
+Revision = 2 hours
+Total = 9 hours
+
+After Module 2 is completed:
+Remaining = 6 hours
+
+The planner recalculates the remaining workload and adjusts future tasks where appropriate.
+
+9.5 ESTIMATED COMPLETION TIME
+
+Each academic task should have an estimated completion time.
+
+Example:
+Relational Algebra = 2.0 hrs
+Functional Dependencies = 1.5 hrs
+Normalization = 3.0 hrs
+Transactions = 2.5 hrs
+
+The system calculates remaining workload.
+
+Example:
+Total remaining = 9 hours
+Available time = 5 days
+Recommended workload ≈ 1.8 hours/day
+
+9.6 ESTIMATION SYSTEM
+
+The initial implementation does not require machine learning.
+
+A heuristic/statistical estimation system can initially use:
+- Task complexity.
+- Subject/topic.
+- Historical completion time.
+- Previous student performance.
+- Task type.
+
+Actual completion times can improve future estimates.
+
+9.7 DYNAMIC RESCHEDULING
+
+If the student falls behind, remaining tasks should be redistributed across future available dates while considering:
+- Remaining tasks.
+- Deadlines.
+- Estimated hours.
+- Completed tasks.
+- Available days/time.
+
+10. FEATURE 4 — NOTES & DOCUMENT MANAGER
+
+Purpose:
+The Notes Manager provides structured storage for academic documents.
+
+10.1 DOCUMENT ORGANIZATION
+
+Core structure:
+
+Semester
+    -> Subject
+        -> Module / Category
+            -> Documents
+
+A module/category can contain multiple documents.
+
+Examples of categories:
+- mod1
+- mod2
+- mod3
+- LAB
+- Project
+- Assignment
+- Other user-defined categories
+
+10.2 DOCUMENT MANAGEMENT
+
+The system should support:
+- Upload documents.
+- Store documents.
+- Associate documents with subjects/modules.
+- Rename documents.
+- Move documents.
+- Delete documents.
+- Download documents.
+- Edit supported text-based documents.
+- Search documents.
+
+Potential supported formats:
+- PDF
+- TXT
+- DOCX
+- PPT/PPTX
+
+Uploaded documents should generally retain their original format.
+
+10.3 AI DOCUMENT RETRIEVAL
+
+Documents should be processed so the AI can retrieve relevant information.
+
+Flow:
+
+Document
+    -> Text Extraction
+        -> Chunking
+            -> Indexing
+                -> Retrieval
+                    -> AI Assistant
+
+10.4 NOTES SEARCH
+
+Initial version can support keyword search.
+
+Future versions can support semantic search.
+
+11. CROSS-MODULE INTEGRATION
+
+The four systems should share data.
+
+AI Assistant
+    /       |       \
+   /        |        \
+ Notes   Calendar   Planner
+   \        |        /
+    \_______|_______/
+       Shared Data
+
+12. SYSTEM-OF-RECORD PRINCIPLE
+
+The backend database is the single source of truth.
+
+The AI should not maintain independent copies of:
+- Tasks.
+- Progress.
+- Calendar events.
+- Subjects.
+- Notes metadata.
+
+AI -> Backend Service -> Database
+
+Example:
+
+AI
+ -> Task/Progress Service
+     -> Database
+         -> Todo + Planner read updated state
+
+13. CONFIRMATION PRINCIPLE
+
+AI actions that modify persistent student data should generally require explicit confirmation.
+
+Examples:
+- AI detects exam -> Add to Calendar.
+- AI detects completed topic -> Update Progress.
+- AI generates notes -> Save as Note.
+
+General flow:
+
+AI understands
+    -> AI proposes action
+        -> Student confirms
+            -> Backend performs action
+
+14. CORE BACKEND SERVICES
+
+The backend should conceptually contain:
+- Authentication Service
+- User Service
+- Academic Structure Service
+- AI Service
+- Document/Notes Service
+- Calendar Service
+- Task/Planner Service
+- Progress Service
+- Notification/Reminder Service
+
+15. HIGH-LEVEL DATA MODEL
+
+Major entities:
+- User
+- AcademicYear
+- Semester
+- Subject
+- Module
+- Document
+- Note
+- Conversation
+- Message
+- CalendarEvent
+- Task
+- Goal
+- ProgressRecord
+- Reminder
+
+16. FUNCTIONAL REQUIREMENTS SUMMARY
+
+FR-01: User can manage academic semesters and subjects.
+FR-02: User can create flexible modules/categories.
+FR-03: User can upload academic documents.
+FR-04: User can organize multiple documents within a module.
+FR-05: AI can answer academic questions.
+FR-06: AI can retrieve information from student documents.
+FR-07: AI-generated explanations are not automatically saved.
+FR-08: User can explicitly save AI-generated notes.
+FR-09: AI notes append to module-level notes.txt by default.
+FR-10: User can explicitly request a new notes file.
+FR-11: AI can generate whole-module summaries.
+FR-12: User can create/update/delete calendar events.
+FR-13: User can store assignment deadlines.
+FR-14: AI can propose calendar events/deadlines.
+FR-15: User can manage tasks.
+FR-16: Planner supports multiple time horizons.
+FR-17: User can track task completion.
+FR-18: AI can propose progress updates.
+FR-19: Planner dynamically recalculates remaining work.
+FR-20: System estimates task completion time.
+FR-21: System tracks actual completion time.
+FR-22: Planner can redistribute remaining tasks.
+FR-23: Calendar events can be associated with planner tasks.
+FR-24: All modules share a common backend source of truth.
+
+17. MVP SCOPE
+
+AI:
+- Academic chatbot.
+- Student-document retrieval.
+- Save as Note.
+- Module-level notes.txt appending.
+- Whole-module summarization.
+- AI -> Calendar action.
+- AI -> Progress update.
+
+Calendar:
+- Event CRUD.
+- Exam deadlines.
+- Assignment deadlines.
+- Subject association.
+- AI-assisted event creation.
+
+Todo/Planner:
+- Task CRUD.
+- Completion tracking.
+- Subject association.
+- Daily/monthly/semester planning.
+- Estimated hours.
+- Dynamic remaining workload.
+
+Notes:
+- Semester/subject/module structure.
+- Multiple documents per module.
+- PDF/TXT/DOCX/PPT support where feasible.
+- Upload/download/delete/move.
+- Search.
+- AI retrieval.
+
+18. FUTURE ENHANCEMENTS
+
+Potential future features:
+- Intelligent study-plan generation.
+- More advanced time prediction.
+- Personalized learning recommendations.
+- Semantic document search.
+- Automatic document categorization.
+- Recurring calendar events.
+- Schedule conflict detection.
+- Notifications.
+- Mobile application.
+- OCR for handwritten/image notes.
+- Analytics dashboard.
+- Exam-performance prediction.
+- Adaptive study scheduling.
+
+19. SUCCESS CRITERIA
+
+The MVP should demonstrate that a student can:
+
+1. Create their semester and subjects.
+2. Create modules/categories within subjects.
+3. Upload multiple documents into a module.
+4. Ask the AI questions using their academic material.
+5. Save an AI-generated topic as notes.
+6. Append another topic to the same module's notes.txt.
+7. Generate a summary of an entire module.
+8. Add an exam or assignment manually to the calendar.
+9. Add an exam or assignment through the AI assistant after confirmation.
+10. Create and manage academic tasks.
+11. Mark completed work through the Todo system.
+12. Report completed academic progress through the AI assistant.
+13. Have the system update the corresponding task/progress state.
+14. Have the planner recalculate remaining work and estimated hours.
+15. See all modules operate using the same underlying academic data.
+
+20. CORE PRODUCT PHILOSOPHY
+
+1. ONE ACADEMIC WORKSPACE
+
+The student should not need separate systems for Notes, AI, Calendar, Todo, and Planner.
+
+2. AI AS AN ASSISTANT, NOT THE AUTHORITY
+
+The AI can understand, suggest, summarize, and recommend, but persistent changes should generally follow:
+
+AI -> Suggest -> Student confirms -> Backend updates
+
+3. DYNAMIC ACADEMIC MANAGEMENT
+
+The planner should reflect actual student progress rather than being a static Todo list.
+
+Progress changes
+    -> Tasks update
+        -> Remaining workload changes
+            -> Planner recalculates
+                -> Next actions change

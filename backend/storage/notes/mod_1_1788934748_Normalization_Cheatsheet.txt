@@ -1,0 +1,5 @@
+Quick Reference:
+1NF -> Atomic
+2NF -> No Partial Dep
+3NF -> No Transitive Dep
+BCNF -> X is Super Key

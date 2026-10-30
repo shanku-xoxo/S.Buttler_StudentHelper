@@ -1,0 +1,14 @@
+DATABASE MANAGEMENT SYSTEMS — MODULE 2: RELATIONAL MODEL & NORMALIZATION
+
+1. Relational Model Fundamentals:
+A relational database consists of tables (relations). Each tuple represents a record.
+Relational algebra operators include Selection (sigma), Projection (pi), Natural Join, and Division.
+
+2. Normalization & Normal Forms:
+- First Normal Form (1NF): All attributes must be atomic.
+- Second Normal Form (2NF): Must be in 1NF and no non-prime attribute is partially dependent on any candidate key.
+- Third Normal Form (3NF): Must be in 2NF and no non-prime attribute is transitively dependent on candidate key.
+- Boyce-Codd Normal Form (BCNF): For every functional dependency X -> Y, X must be a super key.
+
+3. Transactions & Deadlock:
+ACID properties guarantee reliability. Deadlock occurs when processes hold resources in a circular chain.

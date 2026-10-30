@@ -1,0 +1,136 @@
+=== MODULE NOTES ===
+
+
+
+--- Topic: Relational Algebra (2026-09-09 11:36) ---
+Relational algebra uses Selection, Projection, and Join.
+
+
+--- Topic: Whole-Module Summary (Module 2) (2026-09-09 11:36) ---
+=== CONSOLIDATED MODULE SUMMARY: Module 2 ===
+
+Total Documents Analyzed: 1
+Generated Date: 2026-09-09 11:36
+
+Key Module Topics & Takeaways:
+
+1. Document Excerpt:
+   Database Normalization reduces redundancy. First Normal Form (1NF) requires atomic values. Second No
+
+
+
+--- Topic: Relational Algebra (2026-09-09 11:39) ---
+Relational algebra uses Selection, Projection, and Join.
+
+
+--- Topic: Whole-Module Summary (Module 2) (2026-09-09 11:39) ---
+=== CONSOLIDATED MODULE SUMMARY: Module 2 ===
+
+Total Documents Analyzed: 2
+Generated Date: 2026-09-09 11:39
+
+Key Module Topics & Takeaways:
+
+1. Document Excerpt:
+   Database Normalization reduces redundancy. First Normal Form (1NF) requires atomic values. Second No
+
+2. Document Excerpt:
+   Database Normalization reduces redundancy. First Normal Form (1NF) requires atomic values. Second No
+
+
+
+--- Topic: BCNF Key Takeaway (2026-09-09 11:49) ---
+Important Formula: Candidate Key determines all attributes in BCNF.
+
+
+--- Topic: Whole-Module Summary (Module 2 - Relational DBMS) (2026-09-09 11:49) ---
+=== CONSOLIDATED MODULE SUMMARY: Module 2 - Relational DBMS ===
+
+Total Documents Analyzed: 1
+Generated Date: 2026-09-09 11:49
+
+Key Module Topics & Takeaways:
+
+1. Document Excerpt:
+   DATABASE MANAGEMENT SYSTEMS — MODULE 2: RELATIONAL MODEL & NORMALIZATION
+
+1. Relational Model Fundam
+
+
+
+--- Topic: Whole-Module Summary (DBMS) (2026-09-09 12:23) ---
+=== CONSOLIDATED MODULE SUMMARY: DBMS ===
+
+Total Documents Analyzed: 0
+Generated Date: 2026-09-09 12:23
+
+Key Module Topics & Takeaways:
+
+1. Core Concepts & Definitions
+2. Key Formulas & Procedures
+3. Summary of Exercises & Practice Questions
+
+
+
+--- Topic: Whole-Module Summary (DBMS) (2026-09-09 12:26) ---
+=== CONSOLIDATED MODULE SUMMARY: DBMS ===
+
+Total Documents Analyzed: 0
+Generated Date: 2026-09-09 12:26
+
+Key Module Topics & Takeaways:
+
+1. Core Concepts & Definitions
+2. Key Formulas & Procedures
+3. Summary of Exercises & Practice Questions
+
+
+
+--- Topic: Whole-Module Summary (DBMS) (2026-09-09 12:26) ---
+=== CONSOLIDATED MODULE SUMMARY: DBMS ===
+
+Total Documents Analyzed: 0
+Generated Date: 2026-09-09 12:26
+
+Key Module Topics & Takeaways:
+
+1. Core Concepts & Definitions
+2. Key Formulas & Procedures
+3. Summary of Exercises & Practice Questions
+
+
+
+--- Topic: Relational Algebra (2026-09-09 12:46) ---
+Relational algebra uses Selection, Projection, and Join.
+
+
+--- Topic: Whole-Module Summary (DBMS) (2026-09-09 12:46) ---
+=== CONSOLIDATED MODULE SUMMARY: DBMS ===
+
+Total Documents Analyzed: 0
+Generated Date: 2026-09-09 12:46
+
+Key Module Topics & Takeaways:
+
+1. Core Concepts & Definitions
+2. Key Formulas & Procedures
+3. Summary of Exercises & Practice Questions
+
+
+
+--- Topic: BCNF Key Takeaway (2026-10-27 22:22) ---
+Important Formula: Candidate Key determines all attributes in BCNF.
+
+
+--- Topic: Whole-Module Summary (Module 2 - Relational DBMS) (2026-10-27 22:22) ---
+=== CONSOLIDATED MODULE SUMMARY: Module 2 - Relational DBMS ===
+
+Total Documents Analyzed: 0
+Generated Date: 2026-10-27 22:22
+
+Key Module Topics & Takeaways:
+
+1. Core Concepts & Definitions
+2. Key Formulas & Procedures
+3. Summary of Exercises & Practice Questions
+

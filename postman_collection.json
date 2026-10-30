@@ -1,0 +1,274 @@
+{
+	"info": {
+		"_postman_id": "student-academic-assistant-collection",
+		"name": "Student Academic Assistant API",
+		"description": "Complete Postman collection for Student Academic Assistant Backend REST APIs.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "0. System Health",
+			"item": [
+				{
+					"name": "Root Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/",
+							"protocol": "http",
+							"host": ["127", "0", "0", "1"],
+							"port": "8000",
+							"path": [""]
+						}
+					}
+				},
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/health",
+							"protocol": "http",
+							"host": ["127", "0", "0", "1"],
+							"port": "8000",
+							"path": ["health"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "1. Academic Hierarchy",
+			"item": [
+				{
+					"name": "Create Academic Year",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"2025-2026\",\n  \"start_date\": \"2025-08-01\",\n  \"end_date\": \"2026-05-31\"\n}"
+						},
+						"url": {"raw": "http://127.0.0.1:8000/api/academic/years", "protocol": "http", "host": ["127", "0", "0", "1"], "port": "8000", "path": ["api", "academic", "years"]}
+					}
+				},
+				{
+					"name": "Create Semester",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Semester 4\",\n  \"academic_year_id\": 1\n}"
+						},
+						"url": {"raw": "http://127.0.0.1:8000/api/academic/semesters", "protocol": "http", "host": ["127", "0", "0", "1"], "port": "8000", "path": ["api", "academic", "semesters"]}
+					}
+				},
+				{
+					"name": "Create Subject",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Database Management Systems\",\n  \"semester_id\": 1,\n  \"code\": \"CS301\"\n}"
+						},
+						"url": {"raw": "http://127.0.0.1:8000/api/academic/subjects", "protocol": "http", "host": ["127", "0", "0", "1"], "port": "8000", "path": ["api", "academic", "subjects"]}
+					}
+				},
+				{
+					"name": "Create Module",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Module 2 - Relational DBMS\",\n  \"subject_id\": 1,\n  \"code\": \"MOD2\"\n}"
+						},
+						"url": {"raw": "http://127.0.0.1:8000/api/academic/modules", "protocol": "http", "host": ["127", "0", "0", "1"], "port": "8000", "path": ["api", "academic", "modules"]}
+					}
+				}
+			]
+		},
+		{
+			"name": "2. Documents & Notes",
+			"item": [
+				{
+					"name": "Upload Document",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{"key": "module_id", "value": "1", "type": "text"},
+								{"key": "file", "type": "file", "src": []}
+							]
+						},
+						"url": {"raw": "http://127.0.0.1:8000/api/documents/upload", "protocol": "http", "host": ["127", "0", "0", "1"], "port": "8000", "path": ["api", "documents", "upload"]}
+					}
+				},
+				{
+					"name": "Search Documents",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "http://127.0.0.1:8000/api/documents/search?query=Normalization&module_id=1", "protocol": "http", "host": ["127", "0", "0", "1"], "port": "8000", "path": ["api", "documents", "search"], "query": [{"key": "query", "value": "Normalization"}, {"key": "module_id", "value": "1"}]}
+					}
+				},
+				{
+					"name": "Get Default Note",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "http://127.0.0.1:8000/api/documents/notes/default/1", "protocol": "http", "host": ["127", "0", "0", "1"], "port": "8000", "path": ["api", "documents", "notes", "default", "1"]}
+					}
+				},
+				{
+					"name": "Append to Default Note",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{"key": "content", "value": "Relational algebra Selection (sigma) filters rows.", "type": "text"},
+								{"key": "topic_header", "value": "Selection Operator", "type": "text"}
+							]
+						},
+						"url": {"raw": "http://127.0.0.1:8000/api/documents/notes/1/append", "protocol": "http", "host": ["127", "0", "0", "1"], "port": "8000", "path": ["api", "documents", "notes", "1", "append"]}
+					}
+				}
+			]
+		},
+		{
+			"name": "3. AI Assistant",
+			"item": [
+				{
+					"name": "AI Chat Q&A",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"message\": \"Explain normalization in simple terms.\",\n  \"module_id\": 1\n}"
+						},
+						"url": {"raw": "http://127.0.0.1:8000/api/ai/chat", "protocol": "http", "host": ["127", "0", "0", "1"], "port": "8000", "path": ["api", "ai", "chat"]}
+					}
+				},
+				{
+					"name": "AI Chat Propose Calendar Event",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"message\": \"My DBMS exam is next Thursday at 10 AM\",\n  \"module_id\": 1\n}"
+						},
+						"url": {"raw": "http://127.0.0.1:8000/api/ai/chat", "protocol": "http", "host": ["127", "0", "0", "1"], "port": "8000", "path": ["api", "ai", "chat"]}
+					}
+				},
+				{
+					"name": "Confirm Proposed Action",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"proposed_action_id\": 1,\n  \"confirm\": true\n}"
+						},
+						"url": {"raw": "http://127.0.0.1:8000/api/ai/confirm-action", "protocol": "http", "host": ["127", "0", "0", "1"], "port": "8000", "path": ["api", "ai", "confirm-action"]}
+					}
+				},
+				{
+					"name": "Summarize Module",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"module_id\": 1\n}"
+						},
+						"url": {"raw": "http://127.0.0.1:8000/api/ai/summarize-module", "protocol": "http", "host": ["127", "0", "0", "1"], "port": "8000", "path": ["api", "ai", "summarize-module"]}
+					}
+				}
+			]
+		},
+		{
+			"name": "4. Calendar & Deadlines",
+			"item": [
+				{
+					"name": "Create Event",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"DBMS Assignment 1\",\n  \"subject_id\": 1,\n  \"event_type\": \"Assignment\",\n  \"due_date\": \"2026-09-28\",\n  \"description\": \"SQL Optimization assignment\"\n}"
+						},
+						"url": {"raw": "http://127.0.0.1:8000/api/calendar/events", "protocol": "http", "host": ["127", "0", "0", "1"], "port": "8000", "path": ["api", "calendar", "events"]}
+					}
+				},
+				{
+					"name": "Get Events",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "http://127.0.0.1:8000/api/calendar/events?subject_id=1", "protocol": "http", "host": ["127", "0", "0", "1"], "port": "8000", "path": ["api", "calendar", "events"], "query": [{"key": "subject_id", "value": "1"}]}
+					}
+				}
+			]
+		},
+		{
+			"name": "5. Todo & Dynamic Planner",
+			"item": [
+				{
+					"name": "Create Task",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Study Relational Algebra\",\n  \"subject_id\": 1,\n  \"module_id\": 1,\n  \"estimated_hours\": 3.0,\n  \"priority\": \"High\"\n}"
+						},
+						"url": {"raw": "http://127.0.0.1:8000/api/tasks", "protocol": "http", "host": ["127", "0", "0", "1"], "port": "8000", "path": ["api", "tasks"]}
+					}
+				},
+				{
+					"name": "Get Workload Summary",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "http://127.0.0.1:8000/api/tasks/workload/summary?subject_id=1", "protocol": "http", "host": ["127", "0", "0", "1"], "port": "8000", "path": ["api", "tasks", "workload", "summary"], "query": [{"key": "subject_id", "value": "1"}]}
+					}
+				},
+				{
+					"name": "Complete Task",
+					"request": {
+						"method": "PUT",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"Completed\",\n  \"actual_hours\": 2.5\n}"
+						},
+						"url": {"raw": "http://127.0.0.1:8000/api/tasks/1", "protocol": "http", "host": ["127", "0", "0", "1"], "port": "8000", "path": ["api", "tasks", "1"]}
+					}
+				},
+				{
+					"name": "Redistribute Workload",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"available_days\": 4,\n  \"max_daily_hours\": 4.0\n}"
+						},
+						"url": {"raw": "http://127.0.0.1:8000/api/tasks/redistribute?subject_id=1", "protocol": "http", "host": ["127", "0", "0", "1"], "port": "8000", "path": ["api", "tasks", "redistribute"], "query": [{"key": "subject_id", "value": "1"}]}
+					}
+				}
+			]
+		}
+	]
+}

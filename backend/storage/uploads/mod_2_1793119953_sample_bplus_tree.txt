@@ -1,0 +1,12 @@
+B+ TREE INDEXING IN MODERN DATABASES
+
+Introduction:
+A B+ tree is an self-balancing tree data structure that maintains sorted data and allows searches, sequential access, insertions, and deletions in logarithmic time.
+
+Properties:
+- All leaves are at the exact same depth.
+- Internal nodes store search-key values and pointers to child nodes.
+- Leaf nodes are linked sequentially as a doubly-linked list for fast range scans.
+
+Fan-out and Performance:
+High fan-out reduces the tree height, typically resulting in 3 to 4 levels for millions of records.

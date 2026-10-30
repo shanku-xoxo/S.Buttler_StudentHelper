@@ -1,0 +1,1 @@
+Database Normalization reduces redundancy. First Normal Form (1NF) requires atomic values. Second Normal Form (2NF) eliminates partial dependencies. Third Normal Form (3NF) eliminates transitive dependencies.
