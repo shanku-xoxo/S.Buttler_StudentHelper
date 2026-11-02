@@ -2,10 +2,46 @@ import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Plus, Calendar as CalendarIcon, Clock, CheckSquare, Edit3, Trash2 } from 'lucide-react';
 import { getCalendarEvents, createCalendarEvent, updateCalendarEvent, deleteCalendarEvent, getTasks } from '../services/api';
 
+const MONTH_NAMES = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'
+];
+
+const formatDateKey = (year, monthZeroIndexed, day) => {
+  const mm = String(monthZeroIndexed + 1).padStart(2, '0');
+  const dd = String(day).padStart(2, '0');
+  return `${year}-${mm}-${dd}`;
+};
+
+const getEventColor = (eventType) => {
+  switch (eventType?.toLowerCase()) {
+    case 'exam':
+      return 'var(--status-exam)';
+    case 'assignment':
+      return 'var(--status-assignment)';
+    case 'class':
+      return 'var(--status-class)';
+    case 'lab':
+      return '#06b6d4';
+    case 'study':
+    case 'study session':
+      return 'var(--status-study)';
+    default:
+      return 'var(--accent)';
+  }
+};
+
 export default function CalendarView() {
   const [events, setEvents] = useState([]);
   const [tasks, setTasks] = useState([]);
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [currentDate, setCurrentDate] = useState(() => {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), 1);
+  });
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const now = new Date();
+    return formatDateKey(now.getFullYear(), now.getMonth(), now.getDate());
+  });
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingEvent, setEditingEvent] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -36,6 +72,21 @@ export default function CalendarView() {
   useEffect(() => {
     loadCalendar();
   }, []);
+
+  const handlePrevMonth = () => {
+    setCurrentDate(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
+  };
+
+  const handleNextMonth = () => {
+    setCurrentDate(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
+  };
+
+  const handleToday = () => {
+    const now = new Date();
+    setCurrentDate(new Date(now.getFullYear(), now.getMonth(), 1));
+    const todayStr = formatDateKey(now.getFullYear(), now.getMonth(), now.getDate());
+    setSelectedDate(todayStr);
+  };
 
   const handleCreateEvent = async (e) => {
     e.preventDefault();
@@ -83,6 +134,64 @@ export default function CalendarView() {
     }
   };
 
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth();
+
+  // Days in current month
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  // First day of current month (0: Sun, 1: Mon, ..., 6: Sat)
+  const firstDayIndex = new Date(year, month, 1).getDay();
+  // Days in previous month
+  const daysInPrevMonth = new Date(year, month, 0).getDate();
+
+  const prevMonthCells = Array.from({ length: firstDayIndex }).map((_, i) => {
+    const dayNum = daysInPrevMonth - firstDayIndex + 1 + i;
+    const prevDate = new Date(year, month - 1, dayNum);
+    const dateStr = formatDateKey(prevDate.getFullYear(), prevDate.getMonth(), prevDate.getDate());
+    return {
+      dayNum,
+      dateStr,
+      isCurrentMonth: false,
+      year: prevDate.getFullYear(),
+      month: prevDate.getMonth()
+    };
+  });
+
+  const currentMonthCells = Array.from({ length: daysInMonth }).map((_, i) => {
+    const dayNum = i + 1;
+    const dateStr = formatDateKey(year, month, dayNum);
+    return {
+      dayNum,
+      dateStr,
+      isCurrentMonth: true,
+      year,
+      month
+    };
+  });
+
+  const totalCellsSoFar = prevMonthCells.length + currentMonthCells.length;
+  const remainingCells = (7 - (totalCellsSoFar % 7)) % 7;
+
+  const nextMonthCells = Array.from({ length: remainingCells }).map((_, i) => {
+    const dayNum = i + 1;
+    const nextDate = new Date(year, month + 1, dayNum);
+    const dateStr = formatDateKey(nextDate.getFullYear(), nextDate.getMonth(), nextDate.getDate());
+    return {
+      dayNum,
+      dateStr,
+      isCurrentMonth: false,
+      year: nextDate.getFullYear(),
+      month: nextDate.getMonth()
+    };
+  });
+
+  const calendarGrid = [...prevMonthCells, ...currentMonthCells, ...nextMonthCells];
+
+  const todayStr = (() => {
+    const now = new Date();
+    return formatDateKey(now.getFullYear(), now.getMonth(), now.getDate());
+  })();
+
   const dayEvents = events.filter(e => e.due_date === selectedDate || e.start_time?.startsWith(selectedDate));
   const linkedTasks = tasks.filter(t => dayEvents.some(e => e.id === t.calendar_event_id));
 
@@ -91,11 +200,55 @@ export default function CalendarView() {
       {/* Calendar Month Grid */}
       <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '16px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-hairline)', paddingBottom: '12px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <CalendarIcon size={20} style={{ color: 'var(--accent)' }} />
-            <h2 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text-primary)' }}>September 2026</h2>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <CalendarIcon size={20} style={{ color: 'var(--accent)' }} />
+              <h2 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text-primary)', minWidth: '170px' }}>
+                {MONTH_NAMES[month]} {year}
+              </h2>
+            </div>
+
+            {/* Pagination Controls */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <button
+                type="button"
+                className="btn btn-outline"
+                style={{ padding: '6px 8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                onClick={handlePrevMonth}
+                title="Previous Month"
+                aria-label="Previous Month"
+              >
+                <ChevronLeft size={16} />
+              </button>
+              <button
+                type="button"
+                className="btn btn-outline"
+                style={{ padding: '5px 12px', fontSize: '12px', fontWeight: 500 }}
+                onClick={handleToday}
+                title="Jump to Current Month"
+              >
+                Today
+              </button>
+              <button
+                type="button"
+                className="btn btn-outline"
+                style={{ padding: '6px 8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                onClick={handleNextMonth}
+                title="Next Month"
+                aria-label="Next Month"
+              >
+                <ChevronRight size={16} />
+              </button>
+            </div>
           </div>
-          <button className="btn btn-primary" onClick={() => setShowAddModal(true)}>
+
+          <button
+            className="btn btn-primary"
+            onClick={() => {
+              setNewEvent(prev => ({ ...prev, due_date: selectedDate }));
+              setShowAddModal(true);
+            }}
+          >
             <Plus size={16} /> Add Event
           </button>
         </div>
@@ -116,52 +269,82 @@ export default function CalendarView() {
           </div>
         </div>
 
-        {/* Simple Month Grid View */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '6px', flex: 1 }}>
+        {/* Month Grid View */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '6px', flex: 1, gridAutoRows: '1fr' }}>
           {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
             <div key={day} style={{ textAlign: 'center', fontSize: '11px', fontWeight: 600, color: 'var(--text-muted)', paddingBottom: '4px' }}>
               {day}
             </div>
           ))}
 
-          {Array.from({ length: 30 }).map((_, i) => {
-            const dayNum = i + 1;
-            const dateStr = `2026-09-${dayNum < 10 ? '0' + dayNum : dayNum}`;
-            const isSelected = selectedDate === dateStr;
-            const dayEvts = events.filter(e => e.due_date === dateStr);
+          {calendarGrid.map(cell => {
+            const isSelected = selectedDate === cell.dateStr;
+            const isToday = cell.dateStr === todayStr;
+            const dayEvts = events.filter(e => e.due_date === cell.dateStr || e.start_time?.startsWith(cell.dateStr));
 
             return (
               <div
-                key={dateStr}
-                onClick={() => setSelectedDate(dateStr)}
+                key={cell.dateStr}
+                onClick={() => {
+                  setSelectedDate(cell.dateStr);
+                  if (!cell.isCurrentMonth) {
+                    setCurrentDate(new Date(cell.year, cell.month, 1));
+                  }
+                }}
                 style={{
                   backgroundColor: isSelected ? 'var(--bg-surface-raised)' : 'var(--bg-base)',
-                  border: isSelected ? '1px solid var(--accent)' : '1px solid var(--border-hairline)',
+                  border: isSelected ? '1.5px solid var(--accent)' : '1px solid var(--border-hairline)',
                   borderRadius: '6px',
                   padding: '8px',
                   cursor: 'pointer',
                   display: 'flex',
                   flexDirection: 'column',
                   justifyContent: 'space-between',
-                  minHeight: '60px'
+                  minHeight: '60px',
+                  opacity: cell.isCurrentMonth ? 1 : 0.45,
+                  transition: 'background-color 0.15s ease, border-color 0.15s ease'
                 }}
               >
-                <span style={{ fontSize: '12px', fontWeight: isSelected ? 600 : 400, color: isSelected ? 'var(--accent)' : 'var(--text-primary)' }}>
-                  {dayNum}
-                </span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{
+                    fontSize: '12px',
+                    fontWeight: isSelected || isToday ? 600 : 400,
+                    color: isSelected ? 'var(--accent)' : isToday ? 'var(--accent)' : cell.isCurrentMonth ? 'var(--text-primary)' : 'var(--text-muted)'
+                  }}>
+                    {cell.dayNum}
+                  </span>
+                  {isToday && (
+                    <span style={{
+                      fontSize: '9px',
+                      padding: '1px 5px',
+                      borderRadius: '4px',
+                      backgroundColor: 'rgba(99, 102, 241, 0.15)',
+                      color: 'var(--accent)',
+                      fontWeight: 600
+                    }}>
+                      Today
+                    </span>
+                  )}
+                </div>
 
-                <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
-                  {dayEvts.map((e, idx) => (
+                <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', marginTop: '4px' }}>
+                  {dayEvts.slice(0, 4).map((e, idx) => (
                     <span
                       key={idx}
+                      title={`${e.event_type}: ${e.title}`}
                       style={{
                         width: '6px',
                         height: '6px',
                         borderRadius: '50%',
-                        backgroundColor: e.event_type === 'Exam' ? 'var(--status-exam)' : 'var(--status-assignment)'
+                        backgroundColor: getEventColor(e.event_type)
                       }}
                     />
                   ))}
+                  {dayEvts.length > 4 && (
+                    <span style={{ fontSize: '9px', color: 'var(--text-muted)', lineHeight: '6px' }}>
+                      +{dayEvts.length - 4}
+                    </span>
+                  )}
                 </div>
               </div>
             );
