@@ -624,12 +624,22 @@ class AIService:
 
     @staticmethod
     def smart_academic_qa(question: str, context_docs: List[Dict[str, Any]]) -> str:
-        """Master offline academic responder: combines document grounding, curated knowledge, math evaluation, and Wikipedia Action API."""
-        # 1. Check document context first if provided
+        """Master academic responder: uses Gemini with document context when available, with offline fallbacks."""
+        # 1. If documents are attached, use Gemini with document content as context (most accurate)
         if context_docs:
-            doc_ans = AIService.answer_from_document(question, context_docs)
-            if doc_ans:
-                return doc_ans
+            attached = [d for d in context_docs if d.get("is_attached")]
+            target_docs = attached if attached else context_docs
+            context_str = ""
+            for doc in target_docs[:2]:
+                snippet = (doc.get("snippet") or "").strip()
+                title = doc.get("title", "Document")
+                if snippet:
+                    context_str += f"[Document: {title}]\n{snippet[:4000]}\n\n"
+
+            if context_str:
+                gemini_ans = AIService.call_gemini(question, context_str)
+                if gemini_ans:
+                    return gemini_ans
 
         # 2. Check safe math evaluation
         math_ans = AIService.solve_math_query(question)
@@ -639,32 +649,81 @@ class AIService:
         # 3. Check curated offline academic knowledge base
         kb_ans = AIService.get_offline_academic_knowledge(question)
         if kb_ans:
-            # If documents were attached but the concept was general, politely indicate context
-            if context_docs and context_docs[0].get("is_attached"):
-                doc_name = context_docs[0].get("title", "document")
-                return f"*(Note: Concept answered from general academic knowledge; not directly found in `{doc_name}`)*\n\n{kb_ans}"
             return kb_ans
 
-        # 4. Check Wikipedia Action API for comprehensive real-world answers
+        # 4. Try Gemini without document context (general knowledge)
+        gemini_ans = AIService.call_gemini(question)
+        if gemini_ans:
+            return gemini_ans
+
+        # 5. Wikipedia fallback
         wiki_ans = AIService.fetch_wikipedia_summary(question)
         if wiki_ans:
-            if context_docs and context_docs[0].get("is_attached"):
-                doc_name = context_docs[0].get("title", "document")
-                return f"*(Note: Concept answered from academic reference; not directly found in `{doc_name}`)*\n\n{wiki_ans}"
             return wiki_ans
 
-        # 5. Fallback clean response
-        clean_topic = re.sub(r'^(what|who|where|when|why|how|explain|define|tell me about|is|the|a|an)\s+', '', question.strip(), flags=re.IGNORECASE)
-        clean_topic = clean_topic.rstrip('?').strip().title() or "Academic Concept"
+        return "I'm not sure about that. Could you give me more details or try rephrasing?"
 
-        return (
-            f"### {clean_topic}\n\n"
-            f"**{clean_topic}** refers to an important academic principle or concept evaluated in coursework and examinations.\n\n"
-            f"**Core Principles:**\n"
-            f"• Establishes fundamental terminology, rules, and problem-solving methods in this subject area.\n"
-            f"• Directly evaluated in course assignments, tests, and module exams.\n\n"
-            f"*Tip: You can attach syllabus slides or PDF notes directly to receive exact syllabus-aligned definitions and formulas!*"
+    # -----------------------------------------------------------------------
+    # Scheduling intent detection
+    # -----------------------------------------------------------------------
+    SCHEDULING_PATTERNS = [
+        r"i (have|got|have got) (an?\s+)?(exam|test|quiz|assignment|submission|deadline|viva|practical|lab)",
+        r"(exam|test|quiz|assignment|submission|deadline|viva|practical|lab) (is |on |at |due )?on\b",
+        r"(exam|test|quiz|assignment|submission|deadline|viva|practical|lab) (is |)due",
+        r"remind me (about|of)? (my )?(exam|test|quiz|assignment)",
+        r"(add|put|set|schedule|save|log|note).{0,30}(exam|test|quiz|assignment|deadline|event).{0,30}(calendar|schedule|reminder|date)",
+        r"(calendar|schedule|reminder).{0,30}(exam|test|quiz|assignment|deadline)",
+    ]
+
+    DATE_PATTERNS = [
+        r"\b(\d{1,2})(?:st|nd|rd|th)?\s+(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:tember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\b",
+        r"\b(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:tember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\s+(\d{1,2})(?:st|nd|rd|th)?\b",
+        r"\b(\d{1,2})/(\d{1,2})(?:/(\d{2,4}))?\b",
+        r"\b(\d{4})-(\d{1,2})-(\d{1,2})\b",
+        r"\b(tomorrow|next\s+(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday|week|month))\b",
+    ]
+
+    SUBJECT_PATTERNS = [
+        r"\b(dbms|database|sql|java|python|c\+\+|c#|javascript|js|os|operating system|cn|computer network|dsa|data structure|algorithm|math|maths|physics|chemistry|biology|history|geography|economics|english|hindi|science|machine learning|ml|ai|artificial intelligence|deep learning|dl|web dev|web development|react|node|django|flask|angular|vue|cloud|aws|azure|gcp|devops|docker|kubernetes)\b",
+    ]
+
+    @staticmethod
+    def detect_scheduling_intent(message: str):
+        """Returns (is_scheduling, event_type, subject, date_str) from the message."""
+        msg_lower = message.lower().strip()
+
+        is_scheduling = any(
+            re.search(p, msg_lower, re.IGNORECASE)
+            for p in AIService.SCHEDULING_PATTERNS
         )
+
+        if not is_scheduling:
+            return False, None, None, None
+
+        # Extract event type
+        event_type = "Exam"
+        for et in ["assignment", "quiz", "test", "viva", "practical", "lab", "submission", "deadline", "exam"]:
+            if et in msg_lower:
+                event_type = et.capitalize()
+                break
+
+        # Extract subject
+        subject = None
+        for p in AIService.SUBJECT_PATTERNS:
+            m = re.search(p, msg_lower, re.IGNORECASE)
+            if m:
+                subject = m.group(0).upper()
+                break
+
+        # Extract date string
+        date_str = None
+        for p in AIService.DATE_PATTERNS:
+            m = re.search(p, msg_lower, re.IGNORECASE)
+            if m:
+                date_str = m.group(0)
+                break
+
+        return True, event_type, subject, date_str
 
     @staticmethod
     def detect_action_proposals(db: Session, message_text: str, conversation_id: int) -> List[ProposedAction]:
@@ -838,6 +897,83 @@ class AIService:
             else:
                 context_blocks.append(f"[STUDY DOCUMENT: {d['title']}]:\n{d['snippet']}")
         context_str = "\n\n".join(context_blocks)
+
+        # ── Scheduling intent: intercept BEFORE Gemini ──────────────────────
+        is_scheduling, event_type, subject, date_str = AIService.detect_scheduling_intent(message)
+
+        if is_scheduling:
+            if not subject:
+                # Ask which subject/exam
+                missing = []
+                if not subject:
+                    missing.append("subject or exam name (e.g. DBMS, Java, Physics)")
+                clarification = (
+                    f"Sure! I\'d love to add that to your calendar. "
+                    f"Could you tell me the **{' and '.join(missing)}**?"
+                )
+                response_text = clarification
+                proposals = []
+            else:
+                # We have enough info — propose the calendar action
+                # Parse date to a real date string (best-effort)
+                from datetime import datetime as _dt
+                parsed_date = None
+                if date_str:
+                    for fmt in ["%d %B", "%d %b", "%B %d", "%b %d", "%d/%m/%Y", "%d/%m/%y", "%d/%m", "%Y-%m-%d"]:
+                        try:
+                            parsed = _dt.strptime(date_str.strip().title(), fmt)
+                            # If no year in format, assume current year (or next year if date has passed)
+                            if parsed.year == 1900:
+                                parsed = parsed.replace(year=_dt.now().year)
+                                if parsed.date() < _dt.now().date():
+                                    parsed = parsed.replace(year=_dt.now().year + 1)
+                            parsed_date = parsed.strftime("%Y-%m-%d")
+                            break
+                        except ValueError:
+                            continue
+
+                target_date = parsed_date or (datetime.now() + timedelta(days=7)).strftime("%Y-%m-%d")
+
+                payload = {
+                    "title": f"{subject} {event_type}",
+                    "event_type": event_type,
+                    "due_date": target_date,
+                    "start_time": f"{target_date} 09:00",
+                    "description": f"Scheduled from chat: \"{message}\"",
+                }
+                action = ProposedAction(
+                    conversation_id=conversation_id,
+                    action_type="ADD_CALENDAR_EVENT",
+                    status="PENDING",
+                    payload_json=payload
+                )
+                db.add(action)
+                db.commit()
+                db.refresh(action)
+
+                date_display = date_str or target_date
+                response_text = (
+                    f"Got it! I\'ve prepared a calendar entry:\n\n"
+                    f"📅 **{subject} {event_type}** on **{date_display}**\n\n"
+                    f"Would you like me to add this to your calendar?"
+                )
+                proposals = [action]
+
+            assistant_msg = Message(conversation_id=conversation_id, sender="assistant", content=response_text)
+            db.add(assistant_msg)
+            db.commit()
+
+            proposal_responses = [ProposedActionResponse.model_validate(p) for p in proposals]
+            return ChatResponse(
+                conversation_id=conversation_id,
+                message=response_text,
+                retrieved_context_sources=sources,
+                proposed_actions=proposal_responses,
+                document_id=None,
+                document_title=None,
+                document_type=None
+            )
+        # ── End scheduling intercept ─────────────────────────────────────────
 
         # Priority 1: Gemini API
         response_text = AIService.call_gemini(message, context_str, custom_api_key=api_key)
